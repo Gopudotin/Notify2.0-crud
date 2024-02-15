@@ -9,12 +9,12 @@ import {
   Put,
   Delete,
 } from '@nestjs/common';
-import { TemplateService } from 'src/template/services/template/template.service';
 import { NotificationTemplate } from 'src/template/template.entity';
+import { NotificationTemplateService } from 'src/template/services/template/template.service';
 
 @Controller('template')
-export class TemplateController {
-  constructor(private readonly templateService: TemplateService) {}
+export class NotificationTemplateController {
+  constructor(private readonly templateService: NotificationTemplateService) {}
 
   @Get()
   findAll(): Promise<NotificationTemplate[]> {
@@ -37,12 +37,12 @@ export class TemplateController {
   updateTemplate(
     @Param('id') id: number,
     @Body() updatedData: Partial<NotificationTemplate>,
-  ): Promise<NotificationTemplate> {
+  ): Promise<[number, NotificationTemplate[]]> {
     return this.templateService.update(id, updatedData);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<void> {
-    await this.templateService.remove(+id);
+  remove(@Param('id') id: string): Promise<void> {
+    return this.templateService.remove(+id);
   }
 }

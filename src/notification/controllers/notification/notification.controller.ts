@@ -4,17 +4,27 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Body,
   Param,
-  Put,
   Delete,
+  NotFoundException,
 } from '@nestjs/common';
 import { Notification } from 'src/notification/notification.entity';
 import { NotificationService } from 'src/notification/services/notification/notification.service';
+import { CreateNotificationDto } from 'src/notification/create-notification.dto';
 
 @Controller('notification')
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
+
+  // Create notification for multiple subscribers
+  @Post()
+  async create(
+    @Body() createNotificationDto: CreateNotificationDto,
+  ): Promise<Notification[]> {
+    return this.notificationService.create(createNotificationDto);
+  }
 
   @Get()
   findAll(): Promise<Notification[]> {
@@ -24,13 +34,6 @@ export class NotificationController {
   @Get(':id')
   findOne(@Param('id') id: string): Promise<Notification> {
     return this.notificationService.findOne(+id);
-  }
-
-  @Post()
-  create(
-    @Body() notificationData: Partial<Notification>,
-  ): Promise<Notification> {
-    return this.notificationService.create(notificationData);
   }
 
   @Put(':id')

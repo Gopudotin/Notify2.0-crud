@@ -1,3 +1,5 @@
+// subscriber.entity.ts
+
 import { Table, Column, Model, DataType } from 'sequelize-typescript';
 
 @Table({ tableName: 'subscriber' })
@@ -12,8 +14,9 @@ export class Subscriber extends Model {
   @Column({
     type: DataType.STRING,
     allowNull: false,
+    field: 'external_userid',
   })
-  external_userid: string;
+  externalUserId: string;
 
   @Column({
     type: DataType.STRING,

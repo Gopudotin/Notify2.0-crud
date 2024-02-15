@@ -1,4 +1,5 @@
 // sub-notification.entity.ts
+
 import {
   Table,
   Column,
@@ -7,7 +8,7 @@ import {
   ForeignKey,
 } from 'sequelize-typescript';
 import { Notification } from '../notification/notification.entity';
-import { Subscriber } from 'src/subscribers/subscriber.entity';
+import { Subscriber } from '../subscribers/subscriber.entity';
 
 @Table({ tableName: 'sub_notification' })
 export class SubNotification extends Model {

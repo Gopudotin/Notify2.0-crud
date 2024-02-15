@@ -9,12 +9,12 @@ import {
   Put,
   Delete,
 } from '@nestjs/common';
-import { TypeService } from 'src/type/services/type/type.service';
 import { NotificationType } from 'src/type/type.entity';
+import { NotificationTypeService } from 'src/type/services/type/type.service';
 
 @Controller('type')
-export class TypeController {
-  constructor(private readonly typeService: TypeService) {}
+export class NotificationTypeController {
+  constructor(private readonly typeService: NotificationTypeService) {}
 
   @Get()
   findAll(): Promise<NotificationType[]> {
@@ -34,15 +34,15 @@ export class TypeController {
   }
 
   @Put(':id')
-  updateNotificationType(
+  updateType(
     @Param('id') id: number,
     @Body() updatedData: Partial<NotificationType>,
-  ): Promise<NotificationType> {
+  ): Promise<[number, NotificationType[]]> {
     return this.typeService.update(id, updatedData);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<void> {
-    await this.typeService.remove(+id);
+  remove(@Param('id') id: string): Promise<void> {
+    return this.typeService.remove(+id);
   }
 }

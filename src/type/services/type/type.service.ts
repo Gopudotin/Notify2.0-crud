@@ -5,7 +5,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { NotificationType } from 'src/type/type.entity';
 
 @Injectable()
-export class TypeService {
+export class NotificationTypeService {
   constructor(
     @InjectModel(NotificationType)
     private readonly typeModel: typeof NotificationType,
@@ -26,9 +26,16 @@ export class TypeService {
   async update(
     id: number,
     typeData: Partial<NotificationType>,
-  ): Promise<NotificationType> {
-    await this.typeModel.update(typeData, { where: { id } });
-    return this.findOne(id);
+  ): Promise<[number, NotificationType[]]> {
+    const [affectedCount, updatedTypes] = await this.typeModel.update(
+      typeData,
+      {
+        where: { id },
+        returning: true,
+      },
+    );
+
+    return [affectedCount, updatedTypes];
   }
 
   async remove(id: number): Promise<void> {

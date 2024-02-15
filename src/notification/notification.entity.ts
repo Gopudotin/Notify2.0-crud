@@ -1,4 +1,5 @@
 // notification.entity.ts
+
 import { Table, Column, Model, DataType } from 'sequelize-typescript';
 
 @Table({ tableName: 'notification' })
@@ -21,12 +22,6 @@ export class Notification extends Model {
     allowNull: false,
   })
   description: string;
-
-  @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
-  payload?: string;
 
   @Column({
     type: DataType.DATE,

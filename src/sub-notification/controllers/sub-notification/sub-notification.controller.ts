@@ -47,4 +47,12 @@ export class SubNotificationController {
   remove(@Param('id') id: string): Promise<void> {
     return this.subNotificationService.remove(+id);
   }
+
+  @Put('read/:subscriberId/:notificationId')
+  markAsRead(
+    @Param('subscriberId') subscriberId: number,
+    @Param('notificationId') notificationId: number,
+  ): Promise<void> {
+    return this.subNotificationService.markAsRead(subscriberId, notificationId);
+  }
 }

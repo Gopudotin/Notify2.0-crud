@@ -1,13 +1,13 @@
 // type.module.ts
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { TypeController } from './controllers/type/type.controller';
+import { NotificationTypeController } from './controllers/type/type.controller';
+import { NotificationTypeService } from './services/type/type.service';
 import { NotificationType } from './type.entity';
-import { TypeService } from './services/type/type.service';
 
 @Module({
   imports: [SequelizeModule.forFeature([NotificationType])],
-  controllers: [TypeController],
-  providers: [TypeService],
+  controllers: [NotificationTypeController],
+  providers: [NotificationTypeService],
 })
 export class TypeModule {}

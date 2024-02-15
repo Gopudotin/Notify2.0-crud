@@ -1,4 +1,4 @@
-// subscribers.controller.ts
+// subscriber.controller.ts
 
 import {
   Controller,

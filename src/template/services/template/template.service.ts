@@ -5,7 +5,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { NotificationTemplate } from 'src/template/template.entity';
 
 @Injectable()
-export class TemplateService {
+export class NotificationTemplateService {
   constructor(
     @InjectModel(NotificationTemplate)
     private readonly templateModel: typeof NotificationTemplate,
@@ -28,9 +28,16 @@ export class TemplateService {
   async update(
     id: number,
     templateData: Partial<NotificationTemplate>,
-  ): Promise<NotificationTemplate> {
-    await this.templateModel.update(templateData, { where: { id } });
-    return this.findOne(id);
+  ): Promise<[number, NotificationTemplate[]]> {
+    const [affectedCount, updatedTemplates] = await this.templateModel.update(
+      templateData,
+      {
+        where: { id },
+        returning: true,
+      },
+    );
+
+    return [affectedCount, updatedTemplates];
   }
 
   async remove(id: number): Promise<void> {

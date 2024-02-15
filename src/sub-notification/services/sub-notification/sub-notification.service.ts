@@ -41,4 +41,10 @@ export class SubNotificationService {
   async remove(id: number): Promise<void> {
     await this.subNotificationModel.destroy({ where: { id } });
   }
+
+  async markAsRead(subscriberId: number, notificationId: number): Promise<void> {
+    await this.subNotificationModel.update({ has_read: true }, {
+      where: { subscriber_id: subscriberId, notification_id: notificationId },
+    });
+  }
 }
