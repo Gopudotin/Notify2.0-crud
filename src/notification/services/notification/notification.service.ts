@@ -1,9 +1,13 @@
+// notification.service.ts
+
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Notification } from 'src/notification/notification.entity';
 import { NotificationType } from 'src/type/type.entity';
 import { NotificationTemplate } from 'src/template/template.entity';
 import { CreateNotificationDto } from 'src/notification/create-notification.dto';
+import { SubscriberService } from 'src/subscribers/services/subscribers/subscribers.service';
+import { SubNotification } from 'src/sub-notification/sub-notification.entity';
 
 @Injectable()
 export class NotificationService {
@@ -14,6 +18,9 @@ export class NotificationService {
     private readonly notificationTemplateModel: typeof NotificationTemplate,
     @InjectModel(NotificationType)
     private readonly notificationTypeModel: typeof NotificationType,
+    private readonly subscriberService: SubscriberService,
+    @InjectModel(SubNotification)
+    private readonly subNotificationModel: typeof SubNotification,
   ) {}
 
   async create(
@@ -21,30 +28,39 @@ export class NotificationService {
   ): Promise<Notification[]> {
     const { type_id, template_id, subscribers } = createNotificationDto;
 
-    // Retrieve the selected template
+    // Find notification type and template
+    const type = await this.notificationTypeModel.findByPk(type_id);
+    if (!type) {
+      throw new Error('Notification type not found');
+    }
     const template = await this.notificationTemplateModel.findByPk(template_id);
     if (!template) {
       throw new Error('Template not found');
     }
 
-    // Retrieve the notification type
-    const type = await this.notificationTypeModel.findByPk(type_id);
-    if (!type) {
-      throw new Error('Notification type not found');
+    // Fetch subscribers
+    const subscribersData = await this.subscriberService.findByIds(subscribers);
+    if (!subscribersData || subscribersData.length === 0) {
+      throw new Error('Subscribers not found or empty');
     }
-
-    // we are collecting all created notifications in the notifications array and return that array.
 
     const notifications: Notification[] = [];
 
-    for (const subscriberId of subscribers) {
-      // Generate description by replacing placeholders in the template with actual data
-      const description = template.template.replace(
-        '${subscriberName}',
-        `Subscriber ${subscriberId}`,
-      );
+    for (const subscriber of subscribersData) {
+      let description = template.template;
+      // Check if the template contains placeholders
+      const placeholders = description.match(/{{(.*?)}}/g);
+      if (placeholders) {
+        placeholders.forEach((placeholder) => {
+          const key = placeholder.replace(/{{|}}/g, '');
+          description = description.replace(placeholder, subscriber.name || '');
+        });
+      } else {
+        // If no placeholders, append subscriber's name to the end of the template
+        description += `, ${subscriber.name}`;
+      }
 
-      // Create a new notification entry with the generated description
+      // Create notification
       const notification = await this.notificationModel.create({
         title: type.name,
         description,
@@ -52,7 +68,16 @@ export class NotificationService {
       });
 
       notifications.push(notification);
+
+      // Create entry in sub_notification table
+      await this.subNotificationModel.create({
+        notification_id: notification.id,
+        subscriber_id: subscriber.id,
+        has_read: false, // Defaulting has_read to false
+      });
     }
+
+    console.log('Notifications created:', notifications); // <-- Added console log
     return notifications;
   }
 
