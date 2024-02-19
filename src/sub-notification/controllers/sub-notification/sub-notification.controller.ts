@@ -8,6 +8,8 @@ import {
   Param,
   Put,
   Delete,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { SubNotification } from 'src/sub-notification/sub-notification.entity';
 import { SubNotificationService } from 'src/sub-notification/services/sub-notification/sub-notification.service';
@@ -49,10 +51,27 @@ export class SubNotificationController {
   }
 
   @Put('read/:subscriberId/:notificationId')
-  markAsRead(
+  async markAsRead(
     @Param('subscriberId') subscriberId: number,
     @Param('notificationId') notificationId: number,
   ): Promise<void> {
-    return this.subNotificationService.markAsRead(subscriberId, notificationId);
+    try {
+      await this.subNotificationService.markAsRead(
+        subscriberId,
+        notificationId,
+      );
+    } catch (error) {
+      throw new HttpException(
+        'Failed to mark notification as read',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get('subscriber/:subscriberId/notifications')
+  findNotificationsBySubscriberId(
+    @Param('subscriberId') subscriberId: number,
+  ): Promise<SubNotification[]> {
+    return this.subNotificationService.findBySubscriberId(subscriberId);
   }
 }

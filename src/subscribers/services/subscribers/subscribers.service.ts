@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Subscriber } from 'src/subscribers/subscriber.entity';
+import { SubNotification } from 'src/sub-notification/sub-notification.entity';
+import { Notification } from 'src/notification/notification.entity';
 
 @Injectable()
 export class SubscriberService {
   constructor(
     @InjectModel(Subscriber)
     private readonly subscriberModel: typeof Subscriber,
+    @InjectModel(SubNotification)
+    private readonly subNotificationModel: typeof SubNotification,
   ) {}
 
   async findAll(): Promise<Subscriber[]> {
@@ -38,6 +42,24 @@ export class SubscriberService {
       });
 
     return [affectedCount, updatedSubscribers];
+  }
+
+  async getSubscriberNotifications(
+    subscriberId: number,
+  ): Promise<SubNotification[]> {
+    return this.subNotificationModel.findAll({
+      where: { subscriber_id: subscriberId },
+      include: [{ model: Subscriber }],
+    });
+  }
+
+  async findNotificationsBySubscriberId(
+    subscriberId: number,
+  ): Promise<SubNotification[]> {
+    return this.subNotificationModel.findAll({
+      where: { subscriber_id: subscriberId },
+      include: [Notification],
+    });
   }
 
   async remove(id: number): Promise<void> {

@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { Subscriber } from 'src/subscribers/subscriber.entity';
 import { SubscriberService } from 'src/subscribers/services/subscribers/subscribers.service';
+import { SubNotification } from 'src/sub-notification/sub-notification.entity';
 
 @Controller('subscriber')
 export class SubscriberController {
@@ -24,6 +25,13 @@ export class SubscriberController {
   @Get(':id')
   findOne(@Param('id') id: string): Promise<Subscriber> {
     return this.subscriberService.findOne(+id);
+  }
+
+  @Get(':id/notifications')
+  async getSubscriberNotifications(
+    @Param('id') id: string,
+  ): Promise<SubNotification[]> {
+    return this.subscriberService.findNotificationsBySubscriberId(+id);
   }
 
   @Post()

@@ -5,13 +5,20 @@ import {
   Column,
   Model,
   DataType,
+  BelongsTo,
   ForeignKey,
 } from 'sequelize-typescript';
-import { Notification } from '../notification/notification.entity';
-import { Subscriber } from '../subscribers/subscriber.entity';
+import { Notification } from 'src/notification/notification.entity';
+import { Subscriber } from 'src/subscribers/subscriber.entity';
 
 @Table({ tableName: 'sub_notification' })
 export class SubNotification extends Model {
+  @BelongsTo(() => Notification)
+  notification: Notification;
+
+  @BelongsTo(() => Subscriber)
+  subscriber: Subscriber;
+
   @Column({
     type: DataType.INTEGER,
     primaryKey: true,

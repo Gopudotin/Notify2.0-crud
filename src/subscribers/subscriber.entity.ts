@@ -1,9 +1,13 @@
 // subscriber.entity.ts
 
-import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, HasMany } from 'sequelize-typescript';
+import { SubNotification } from '../sub-notification/sub-notification.entity';
 
 @Table({ tableName: 'subscriber' })
 export class Subscriber extends Model {
+  @HasMany(() => SubNotification)
+  subNotifications: SubNotification[]; // Corrected property name
+
   @Column({
     type: DataType.INTEGER,
     primaryKey: true,
