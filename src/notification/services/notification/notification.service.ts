@@ -40,11 +40,19 @@ export class NotificationService {
 
     // Fetch subscribers
     const subscribersData = await this.subscriberService.findByIds(subscribers);
+    console.log(subscribersData);
     if (!subscribersData || subscribersData.length === 0) {
       throw new Error('Subscribers not found or empty');
     }
 
     const notifications: Notification[] = [];
+
+    /*const data = {
+      name: 'Midhun',
+      age: 26,
+      subscriberName: 'Midhu..',
+    };
+*/
 
     for (const subscriber of subscribersData) {
       let description = template.template;
