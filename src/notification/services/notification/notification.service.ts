@@ -1,62 +1,54 @@
 // notification.service.ts
-
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/sequelize';
+import { Queue } from 'bullmq';
+import { CreateNotificationDto } from 'src/notification/create-notification.dto';
 import { Notification } from 'src/notification/notification.entity';
+import { SubNotification } from 'src/sub-notification/sub-notification.entity';
+import { SubscriberService } from 'src/subscribers/services/subscribers/subscribers.service';
 import { NotificationType } from 'src/type/type.entity';
 import { NotificationTemplate } from 'src/template/template.entity';
-import { CreateNotificationDto } from 'src/notification/create-notification.dto';
-import { SubscriberService } from 'src/subscribers/services/subscribers/subscribers.service';
-import { SubNotification } from 'src/sub-notification/sub-notification.entity';
+import { InjectModel } from '@nestjs/sequelize';
 
 @Injectable()
 export class NotificationService {
   constructor(
+    private readonly scheduleQueue: Queue,
+    private readonly subscriberService: SubscriberService,
     @InjectModel(Notification)
     private readonly notificationModel: typeof Notification,
     @InjectModel(NotificationTemplate)
     private readonly notificationTemplateModel: typeof NotificationTemplate,
     @InjectModel(NotificationType)
     private readonly notificationTypeModel: typeof NotificationType,
-    private readonly subscriberService: SubscriberService,
     @InjectModel(SubNotification)
     private readonly subNotificationModel: typeof SubNotification,
   ) {}
 
-  async create(
-    createNotificationDto: CreateNotificationDto,
-  ): Promise<Notification[]> {
+  async create(createNotificationDto: CreateNotificationDto): Promise<Notification[]> {
+    await this.scheduleQueue.add('processNotification', createNotificationDto);
+    return []; // Return an empty array
+  }
+
+  async saveToDatabase(createNotificationDto: CreateNotificationDto): Promise<void> {
     const { type_id, template_id, subscribers } = createNotificationDto;
 
-    // Find notification type and template
     const type = await this.notificationTypeModel.findByPk(type_id);
     if (!type) {
       throw new Error('Notification type not found');
     }
+
     const template = await this.notificationTemplateModel.findByPk(template_id);
     if (!template) {
       throw new Error('Template not found');
     }
 
-    // Fetch subscribers
     const subscribersData = await this.subscriberService.findByIds(subscribers);
-    console.log(subscribersData);
     if (!subscribersData || subscribersData.length === 0) {
       throw new Error('Subscribers not found or empty');
     }
 
-    const notifications: Notification[] = [];
-
-    /*const data = {
-      name: 'Midhun',
-      age: 26,
-      subscriberName: 'Midhu..',
-    };
-*/
-
     for (const subscriber of subscribersData) {
       let description = template.template;
-      // Check if the template contains placeholders
       const placeholders = description.match(/{{(.*?)}}/g);
       if (placeholders) {
         placeholders.forEach((placeholder) => {
@@ -64,29 +56,20 @@ export class NotificationService {
           description = description.replace(placeholder, subscriber.name || '');
         });
       } else {
-        // If no placeholders, append subscriber's name to the end of the template
         description += `, ${subscriber.name}`;
       }
 
-      // Create notification
       const notification = await this.notificationModel.create({
         title: type.name,
         description,
-        // Other fields as needed
       });
 
-      notifications.push(notification);
-
-      // Create entry in sub_notification table
       await this.subNotificationModel.create({
         notification_id: notification.id,
         subscriber_id: subscriber.id,
-        has_read: false, // Defaulting has_read to false
+        has_read: false,
       });
     }
-
-    console.log('Notifications created:', notifications); // <-- Added console log
-    return notifications;
   }
 
   async findAll(): Promise<Notification[]> {

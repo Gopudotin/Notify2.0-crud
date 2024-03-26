@@ -14,4 +14,6 @@ export class CreateNotificationDto {
   @IsNumber({}, { each: true })
   @IsNotEmpty()
   readonly subscribers: number[];
+
+  readonly scheduledTime?: Date;
 }

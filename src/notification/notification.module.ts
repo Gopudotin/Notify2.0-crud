@@ -1,4 +1,3 @@
-// notification.module.ts
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { NotificationController } from './controllers/notification/notification.controller';
@@ -9,6 +8,7 @@ import { NotificationType } from 'src/type/type.entity';
 import { SubscriberService } from 'src/subscribers/services/subscribers/subscribers.service';
 import { Subscriber } from 'src/subscribers/subscriber.entity';
 import { SubNotification } from 'src/sub-notification/sub-notification.entity';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
   imports: [
@@ -19,6 +19,9 @@ import { SubNotification } from 'src/sub-notification/sub-notification.entity';
       Subscriber,
       SubNotification,
     ]),
+    BullModule.registerQueue({
+      name: 'scheduleQueue',
+    }),
   ],
   controllers: [NotificationController],
   providers: [
@@ -28,5 +31,6 @@ import { SubNotification } from 'src/sub-notification/sub-notification.entity';
     SubscriberService,
     SubNotification,
   ],
+  exports: [NotificationService],
 })
 export class NotificationModule {}
