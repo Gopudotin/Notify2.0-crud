@@ -1,6 +1,5 @@
 // notification.service.ts
 import { Injectable } from '@nestjs/common';
-import { Queue } from 'bullmq';
 import { CreateNotificationDto } from 'src/notification/create-notification.dto';
 import { Notification } from 'src/notification/notification.entity';
 import { SubNotification } from 'src/sub-notification/sub-notification.entity';
@@ -12,7 +11,6 @@ import { InjectModel } from '@nestjs/sequelize';
 @Injectable()
 export class NotificationService {
   constructor(
-    private readonly scheduleQueue: Queue,
     private readonly subscriberService: SubscriberService,
     @InjectModel(Notification)
     private readonly notificationModel: typeof Notification,
@@ -24,12 +22,16 @@ export class NotificationService {
     private readonly subNotificationModel: typeof SubNotification,
   ) {}
 
-  async create(createNotificationDto: CreateNotificationDto): Promise<Notification[]> {
-    await this.scheduleQueue.add('processNotification', createNotificationDto);
+  async create(
+    createNotificationDto: CreateNotificationDto,
+  ): Promise<Notification[]> {
+    await this.saveToDatabase(createNotificationDto);
     return []; // Return an empty array
   }
 
-  async saveToDatabase(createNotificationDto: CreateNotificationDto): Promise<void> {
+  async saveToDatabase(
+    createNotificationDto: CreateNotificationDto,
+  ): Promise<void> {
     const { type_id, template_id, subscribers } = createNotificationDto;
 
     const type = await this.notificationTypeModel.findByPk(type_id);

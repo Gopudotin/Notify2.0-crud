@@ -5,7 +5,7 @@ import { SubscriberModule } from './subscribers/subscribers.module';
 import { NotificationModule } from './notification/notification.module';
 import { SubNotificationModule } from './sub-notification/sub-notification.module';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { BullModule } from '@nestjs/bullmq';
+//import { BullModule } from '@nestjs/bullmq';
 
 @Module({
   imports: [
@@ -24,13 +24,13 @@ import { BullModule } from '@nestjs/bullmq';
     SubscriberModule,
     NotificationModule,
     SubNotificationModule,
-    BullModule.forRoot({
-      connection: {
-        host: 'localhost',
-        port: 6379,
-      },
-    }),
-    BullModule.registerQueue({ name: 'scheduleQueue' }),
+    // BullModule.forRoot({
+    //   connection: {
+    //     host: 'localhost',
+    //     port: 6379,
+    //   },
+    // }),
+    // BullModule.registerQueue({ name: 'scheduleQueue' }),
   ],
   controllers: [],
   providers: [],

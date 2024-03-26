@@ -8,7 +8,7 @@ import { NotificationType } from 'src/type/type.entity';
 import { SubscriberService } from 'src/subscribers/services/subscribers/subscribers.service';
 import { Subscriber } from 'src/subscribers/subscriber.entity';
 import { SubNotification } from 'src/sub-notification/sub-notification.entity';
-import { BullModule } from '@nestjs/bullmq';
+//import { BullModule } from '@nestjs/bullmq';
 
 @Module({
   imports: [
@@ -19,9 +19,10 @@ import { BullModule } from '@nestjs/bullmq';
       Subscriber,
       SubNotification,
     ]),
-    BullModule.registerQueue({
-      name: 'scheduleQueue',
-    }),
+
+    // BullModule.registerQueue({
+    //   name: 'scheduleQueue',
+    // }),
   ],
   controllers: [NotificationController],
   providers: [
